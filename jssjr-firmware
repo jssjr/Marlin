@@ -15,6 +15,6 @@ ENDCONFIG
 
 # Upgraded to E3D v6 hotend, uses Semitec 104GT2 based thermistor
 # See: https://wiki.e3d-online.com/Temperature_Sensor_Documentation#Thermistor
-sed -i -e 's/#define TEMP_SENSOR_0 1/#define TEMP_SENSOR_0 5/' Marlin/Configuration.h
+sed -i '' -e 's/#define TEMP_SENSOR_0 1/#define TEMP_SENSOR_0 5/' Marlin/Configuration.h
 
 pio run -e printrboard_revf
