@@ -1,0 +1,1078 @@
+--- ./Marlin/Configuration.h.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/Configuration.h	2017-12-27 04:26:41.482496699 -0700
+@@ -39,6 +39,8 @@
+ #define CONFIGURATION_H
+ #define CONFIGURATION_H_VERSION 010107
+ 
++#include "PrintrBotConfig.h"
++
+ //===========================================================================
+ //============================= Getting Started =============================
+ //===========================================================================
+@@ -74,7 +76,7 @@
+ // User-specified version info of this build to display in [Pronterface, etc] terminal window during
+ // startup. Implementation of an idea by Prof Braino to inform user that any changes made to this
+ // build by the user have been successfully uploaded into firmware.
+-#define STRING_CONFIG_H_AUTHOR "(none, default config)" // Who made the changes.
++#define STRING_CONFIG_H_AUTHOR "(Kelly Anderson, kelly@xilka.com)" // Who made the changes.
+ #define SHOW_BOOTSCREEN
+ #define STRING_SPLASH_LINE1 SHORT_BUILD_VERSION // will be shown during bootup in line 1
+ #define STRING_SPLASH_LINE2 WEBSITE_URL         // will be shown during bootup in line 2
+@@ -119,16 +121,16 @@
+ // The following define selects which electronics board you have.
+ // Please choose the name from boards.h that matches your setup
+ #ifndef MOTHERBOARD
+-  #define MOTHERBOARD BOARD_RAMPS_14_EFB
++  #define MOTHERBOARD BOARD_PRINTRBOARD_REVF
+ #endif
+ 
+ // Optional custom name for your RepStrap or other custom machine
+ // Displayed in the LCD "Ready" message
+-//#define CUSTOM_MACHINE_NAME "3D Printer"
++#define CUSTOM_MACHINE_NAME "Simple Metal"
+ 
+ // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)
+ // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
+-//#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
++#define MACHINE_UUID "40ce61d1-2ed0-4530-8304-55e3eeaaebff"
+ 
+ // @section extruder
+ 
+@@ -137,7 +139,7 @@
+ #define EXTRUDERS 1
+ 
+ // Generally expected filament diameter (1.75, 2.85, 3.0, ...). Used for Volumetric, Filament Width Sensor, etc.
+-#define DEFAULT_NOMINAL_FILAMENT_DIA 3.0
++#define DEFAULT_NOMINAL_FILAMENT_DIA 1.75
+ 
+ // For Cyclops or any "multi-extruder" that shares a single nozzle.
+ //#define SINGLENOZZLE
+@@ -291,7 +293,7 @@
+ #define TEMP_SENSOR_2 0
+ #define TEMP_SENSOR_3 0
+ #define TEMP_SENSOR_4 0
+-#define TEMP_SENSOR_BED 0
++#define TEMP_SENSOR_BED 7
+ 
+ // Dummy thermistor constant temperature readings, for use with 998 and 999
+ #define DUMMY_THERMISTOR_998_VALUE 25
+@@ -315,12 +317,12 @@
+ // The minimal temperature defines the temperature below which the heater will not be enabled It is used
+ // to check that the wiring to the thermistor is not broken.
+ // Otherwise this would lead to the heater being powered on all the time.
+-#define HEATER_0_MINTEMP 5
+-#define HEATER_1_MINTEMP 5
+-#define HEATER_2_MINTEMP 5
+-#define HEATER_3_MINTEMP 5
+-#define HEATER_4_MINTEMP 5
+-#define BED_MINTEMP 5
++#define HEATER_0_MINTEMP 15
++#define HEATER_1_MINTEMP 15
++#define HEATER_2_MINTEMP 15
++#define HEATER_3_MINTEMP 15
++#define HEATER_4_MINTEMP 15
++#define BED_MINTEMP 15
+ 
+ // When temperature exceeds max temp, your heater will be switched off.
+ // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
+@@ -354,10 +356,15 @@
+ 
+   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
+ 
++  // Ubis 13S
++  #define  DEFAULT_Kp 32.77
++  #define  DEFAULT_Ki 5.56
++  #define  DEFAULT_Kd 48.33
++
+   // Ultimaker
+-  #define  DEFAULT_Kp 22.2
+-  #define  DEFAULT_Ki 1.08
+-  #define  DEFAULT_Kd 114
++  //#define  DEFAULT_Kp 22.2
++  //#define  DEFAULT_Ki 1.08
++  //#define  DEFAULT_Kd 114
+ 
+   // MakerGear
+   //#define  DEFAULT_Kp 7.0
+@@ -471,10 +478,10 @@
+ // Almost all printers will be using one per axis. Probes will use one or more of the
+ // extra connectors. Leave undefined any used for non-endstop and non-probe purposes.
+ #define USE_XMIN_PLUG
+-#define USE_YMIN_PLUG
++//#define USE_YMIN_PLUG
+ #define USE_ZMIN_PLUG
+ //#define USE_XMAX_PLUG
+-//#define USE_YMAX_PLUG
++#define USE_YMAX_PLUG
+ //#define USE_ZMAX_PLUG
+ 
+ // coarse Endstop Settings
+@@ -494,11 +501,11 @@
+ // Mechanical endstop with COM to ground and NC to Signal uses "false" here (most common setup).
+ #define X_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+ #define Y_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+-#define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
++#define Z_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
+ #define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+ #define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+ #define Z_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
+-#define Z_MIN_PROBE_ENDSTOP_INVERTING false // set to true to invert the logic of the probe.
++#define Z_MIN_PROBE_ENDSTOP_INVERTING true // set to true to invert the logic of the probe.
+ 
+ // Enable this feature if all enabled endstop pins are interrupt-capable.
+ // This will remove the need to poll the interrupt pins, saving many CPU cycles.
+@@ -529,14 +536,50 @@
+  * Override with M92
+  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
+  */
+-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 4000, 500 }
++#define STEPS_PER_REV_1_8 (200.0)
++#define MICROSTEPS_PER_STEP (16.0)
++#define MICROSTEPS_PER_REV (STEPS_PER_REV_1_8*MICROSTEPS_PER_STEP)
++#define ACME_QUARTER_MM_PER_REV (1.0/16.0*25.4)
++#define ACME_FOUR_START_8MM_MM_PER_REV (8.0)
++
++#if defined(ZROD_FOUR_START_8MM)
++/* 4-Start 8mm Acme lead screw upgrade */
++#define Z_STEPS_PER_MM (MICROSTEPS_PER_REV/ACME_FOUR_START_8MM_MM_PER_REV)
++#elif defined(ZROD_QUARTER)
++/* original simple metal quarter inch */
++/*
++ * Acme quarter inch should calculate to 2015.75
++ * Simple Metal default was incorrect at 2020
++ */
++#define Z_STEPS_PER_MM (MICROSTEPS_PER_REV/ACME_QUARTER_MM_PER_REV)
++#else
++#error "ZROD_QUARTER or ZROD_FOUR_START_8MM must be defined"
++#endif
++
++#if defined(PULLEY_XY_16T)
++#define XY_STEPS_PER_MM 100
++#elif defined(PULLEY_XY_20T)
++#define XY_STEPS_PER_MM 80
++#else
++#error "PULLEY_XY_16T or PULLEY_XY_20T must be defined"
++#endif
++
++#if defined(EXTRUDER_GEARHEAD)
++#define EXTRUDER_STEPS_PER_MM 127
++#elif defined(EXTRUDER_OLD)
++#define EXTRUDER_STEPS_PER_MM 96
++#else
++#error "EXTRUDER_OLD or EXTRUDER_GEARHEAD must be defined"
++#endif
++
++#define DEFAULT_AXIS_STEPS_PER_UNIT { XY_STEPS_PER_MM, XY_STEPS_PER_MM, Z_STEPS_PER_MM, EXTRUDER_STEPS_PER_MM }
+ 
+ /**
+  * Default Max Feed Rate (mm/s)
+  * Override with M203
+  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
+  */
+-#define DEFAULT_MAX_FEEDRATE          { 300, 300, 5, 25 }
++#define DEFAULT_MAX_FEEDRATE          { 125, 125, 5, 25 }
+ 
+ /**
+  * Default Max Acceleration (change/s) change = mm/s
+@@ -544,7 +587,7 @@
+  * Override with M201
+  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
+  */
+-#define DEFAULT_MAX_ACCELERATION      { 3000, 3000, 100, 10000 }
++#define DEFAULT_MAX_ACCELERATION      { 2000, 2000, 300, 10000 }
+ 
+ /**
+  * Default Acceleration (change/s) change = mm/s
+@@ -554,9 +597,9 @@
+  *   M204 R    Retract Acceleration
+  *   M204 T    Travel Acceleration
+  */
+-#define DEFAULT_ACCELERATION          3000    // X, Y, Z and E acceleration for printing moves
+-#define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
+-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration for travel (non printing) moves
++#define DEFAULT_ACCELERATION          1500    // X, Y, Z and E acceleration for printing moves
++#define DEFAULT_RETRACT_ACCELERATION  1500    // E acceleration for retracts
++#define DEFAULT_TRAVEL_ACCELERATION   1800    // X, Y, Z acceleration for travel (non printing) moves
+ 
+ /**
+  * Default Jerk (mm/s)
+@@ -568,8 +611,8 @@
+  */
+ #define DEFAULT_XJERK                 10.0
+ #define DEFAULT_YJERK                 10.0
+-#define DEFAULT_ZJERK                  0.3
+-#define DEFAULT_EJERK                  5.0
++#define DEFAULT_ZJERK                  0.2
++#define DEFAULT_EJERK                  2.5
+ 
+ //===========================================================================
+ //============================= Z Probe Options =============================
+@@ -626,7 +669,7 @@
+  * A Fix-Mounted Probe either doesn't deploy or needs manual deployment.
+  *   (e.g., an inductive probe or a nozzle-based probe-switch.)
+  */
+-//#define FIX_MOUNTED_PROBE
++#define FIX_MOUNTED_PROBE
+ 
+ /**
+  * Z Servo Probe, such as an endstop switch on a rotating arm.
+@@ -683,12 +726,12 @@
+  *      O-- FRONT --+
+  *    (0,0)
+  */
+-#define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
+-#define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
++#define X_PROBE_OFFSET_FROM_EXTRUDER 20  // X offset: -left  +right  [of the nozzle]
++#define Y_PROBE_OFFSET_FROM_EXTRUDER 0  // Y offset: -front +behind [the nozzle]
+ #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
+ 
+ // X and Y axis travel speed (mm/m) between probes
+-#define XY_PROBE_SPEED 8000
++#define XY_PROBE_SPEED 5000
+ 
+ // Speed for the first approach when double-probing (MULTIPLE_PROBING == 2)
+ #define Z_PROBE_SPEED_FAST HOMING_FEEDRATE_Z
+@@ -699,7 +742,7 @@
+ // The number of probes to perform at each point.
+ //   Set to 2 for a fast/slow probe, using the second probe result.
+ //   Set to 3 or more for slow probes, averaging the results.
+-//#define MULTIPLE_PROBING 2
++#define MULTIPLE_PROBING 3
+ 
+ /**
+  * Z probes require clearance when deploying, stowing, and moving between
+@@ -715,12 +758,12 @@
+  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
+  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
+  */
+-#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
+-#define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
++#define Z_CLEARANCE_DEPLOY_PROBE   3 // Z Clearance for Deploy/Stow
++#define Z_CLEARANCE_BETWEEN_PROBES  3 // Z Clearance between probe points
+ 
+ // For M851 give a range for adjusting the Z probe offset
+-#define Z_PROBE_OFFSET_RANGE_MIN -20
+-#define Z_PROBE_OFFSET_RANGE_MAX 20
++#define Z_PROBE_OFFSET_RANGE_MIN -1.6
++#define Z_PROBE_OFFSET_RANGE_MAX 0
+ 
+ // Enable the M48 repeatability test to test probe accuracy
+ //#define Z_MIN_PROBE_REPEATABILITY_TEST
+@@ -748,9 +791,9 @@
+ // @section machine
+ 
+ // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
+-#define INVERT_X_DIR false
++#define INVERT_X_DIR true
+ #define INVERT_Y_DIR true
+-#define INVERT_Z_DIR false
++#define INVERT_Z_DIR true
+ 
+ // Enable this option for Toshiba stepper drivers
+ //#define CONFIG_STEPPERS_TOSHIBA
+@@ -768,28 +811,40 @@
+ 
+ //#define NO_MOTION_BEFORE_HOMING  // Inhibit movement until all axes have been homed
+ 
+-//#define Z_HOMING_HEIGHT 4  // (in mm) Minimal z height before homing (G28) for Z clearance above the bed, clamps, ...
++#define Z_HOMING_HEIGHT 4  // (in mm) Minimal z height before homing (G28) for Z clearance above the bed, clamps, ...
+                              // Be sure you have this distance over your Z_MAX_POS in case.
+ 
+ // Direction of endstops when homing; 1=MAX, -1=MIN
+ // :[-1,1]
+ #define X_HOME_DIR -1
+-#define Y_HOME_DIR -1
++#define Y_HOME_DIR 1
+ #define Z_HOME_DIR -1
+ 
+ // @section machine
+ 
+ // The size of the print bed
+-#define X_BED_SIZE 200
+-#define Y_BED_SIZE 200
++#if defined(X_AXIS_UPGRADE)
++#define X_BED_SIZE 254
++#elif defined(X_AXIS_STANDARD)
++#define X_BED_SIZE 152
++#else
++#error "X_AXIS_UPGRADE or X_AXIS_STANDARD must be defined"
++#endif
++#define Y_BED_SIZE 150
++#if defined(ZROD_SUPER_Z)
++#define Z_MAX_POS 240
++#elif defined(ZROD_STANDARD)
++#define Z_MAX_POS 152
++#else
++#error "ZROD_SUPER_Z or ZROD_STANDARD must be defined"
++#endif
+ 
+ // Travel limits (mm) after homing, corresponding to endstop positions.
+ #define X_MIN_POS 0
+-#define Y_MIN_POS 0
++#define Y_MIN_POS -2
+ #define Z_MIN_POS 0
+ #define X_MAX_POS X_BED_SIZE
+ #define Y_MAX_POS Y_BED_SIZE
+-#define Z_MAX_POS 200
+ 
+ /**
+  * Software Endstops
+@@ -870,7 +925,7 @@
+  *   With an LCD controller the process is guided step-by-step.
+  */
+ //#define AUTO_BED_LEVELING_3POINT
+-//#define AUTO_BED_LEVELING_LINEAR
++#define AUTO_BED_LEVELING_LINEAR
+ //#define AUTO_BED_LEVELING_BILINEAR
+ //#define AUTO_BED_LEVELING_UBL
+ //#define MESH_BED_LEVELING
+@@ -880,7 +935,7 @@
+  * Turn on with the command 'M111 S32'.
+  * NOTE: Requires a lot of PROGMEM!
+  */
+-//#define DEBUG_LEVELING_FEATURE
++#define DEBUG_LEVELING_FEATURE
+ 
+ #if ENABLED(MESH_BED_LEVELING) || ENABLED(AUTO_BED_LEVELING_BILINEAR) || ENABLED(AUTO_BED_LEVELING_UBL)
+   // Gradually reduce leveling correction until a set height is reached,
+@@ -909,15 +964,19 @@
+ 
+ #if ENABLED(AUTO_BED_LEVELING_LINEAR) || ENABLED(AUTO_BED_LEVELING_BILINEAR)
+ 
++#if ENABLED(AUTO_BED_LEVELING_LINEAR)
++  #define ENABLE_LEVELING_FADE_HEIGHT
++#endif
++
+   // Set the number of grid points per dimension.
+-  #define GRID_MAX_POINTS_X 3
++  #define GRID_MAX_POINTS_X 2
+   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
+ 
+   // Set the boundaries for probing (where the probe can reach).
+-  #define LEFT_PROBE_BED_POSITION 15
+-  #define RIGHT_PROBE_BED_POSITION 170
+-  #define FRONT_PROBE_BED_POSITION 20
+-  #define BACK_PROBE_BED_POSITION 170
++  #define LEFT_PROBE_BED_POSITION (X_MIN_POS+X_PROBE_OFFSET_FROM_EXTRUDER)
++  #define RIGHT_PROBE_BED_POSITION (X_MAX_POS-10)
++  #define FRONT_PROBE_BED_POSITION (Y_MIN_POS+10)
++  #define BACK_PROBE_BED_POSITION (Y_MAX_POS-10)
+ 
+   // The Z probe minimum outer margin (to validate G29 parameters).
+   #define MIN_PROBE_EDGE 10
+@@ -947,12 +1006,12 @@
+ 
+   // 3 arbitrary points to probe.
+   // A simple cross-product is used to estimate the plane of the bed.
+-  #define ABL_PROBE_PT_1_X 15
+-  #define ABL_PROBE_PT_1_Y 180
+-  #define ABL_PROBE_PT_2_X 15
+-  #define ABL_PROBE_PT_2_Y 20
+-  #define ABL_PROBE_PT_3_X 170
+-  #define ABL_PROBE_PT_3_Y 20
++  #define ABL_PROBE_PT_1_X (X_MIN_POS+X_PROBE_OFFSET_FROM_EXTRUDER)
++  #define ABL_PROBE_PT_1_Y (Y_MAX_POS-10)
++  #define ABL_PROBE_PT_2_X (X_MIN_POS+X_PROBE_OFFSET_FROM_EXTRUDER)
++  #define ABL_PROBE_PT_2_Y (Y_MIN_POS+10)
++  #define ABL_PROBE_PT_3_X (X_MAX_POS-10)
++  #define ABL_PROBE_PT_3_Y (Y_MIN_POS+10)
+ 
+ #elif ENABLED(AUTO_BED_LEVELING_UBL)
+ 
+@@ -1008,7 +1067,7 @@
+  * Commands to execute at the end of G29 probing.
+  * Useful to retract or move the Z probe out of the way.
+  */
+-//#define Z_PROBE_END_SCRIPT "G1 Z10 F12000\nG1 X15 Y330\nG1 Z0.5\nG1 Z10"
++//#define Z_PROBE_END_SCRIPT "G1 Z4 F300"
+ 
+ 
+ // @section homing
+@@ -1031,7 +1090,7 @@
+ // - Move the Z probe (or nozzle) to a defined XY point before Z Homing when homing all axes (G28).
+ // - Prevent Z homing when the Z probe is outside bed area.
+ //
+-//#define Z_SAFE_HOMING
++#define Z_SAFE_HOMING
+ 
+ #if ENABLED(Z_SAFE_HOMING)
+   #define Z_SAFE_HOMING_X_POINT ((X_BED_SIZE) / 2)    // X point for Z homing when homing all axes (G28).
+@@ -1113,7 +1172,7 @@
+ // M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).
+ // M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
+ //
+-//#define EEPROM_SETTINGS // Enable for M500 and M501 commands
++#define EEPROM_SETTINGS // Enable for M500 and M501 commands
+ //#define DISABLE_M503    // Saves ~2700 bytes of PROGMEM. Disable for release!
+ #define EEPROM_CHITCHAT   // Give feedback on EEPROM commands. Disable to save PROGMEM.
+ 
+@@ -1145,13 +1204,13 @@
+ // @section temperature
+ 
+ // Preheat Constants
+-#define PREHEAT_1_TEMP_HOTEND 180
+-#define PREHEAT_1_TEMP_BED     70
+-#define PREHEAT_1_FAN_SPEED     0 // Value from 0 to 255
++#define PREHEAT_1_TEMP_HOTEND 200
++#define PREHEAT_1_TEMP_BED     60
++#define PREHEAT_1_FAN_SPEED   255 // Value from 0 to 255
+ 
+ #define PREHEAT_2_TEMP_HOTEND 240
+-#define PREHEAT_2_TEMP_BED    110
+-#define PREHEAT_2_FAN_SPEED     0 // Value from 0 to 255
++#define PREHEAT_2_TEMP_BED     90
++#define PREHEAT_2_FAN_SPEED   255 // Value from 0 to 255
+ 
+ /**
+  * Nozzle Park
+@@ -1329,7 +1388,7 @@
+  * you must uncomment the following option or it won't work.
+  *
+  */
+-//#define SDSUPPORT
++#define SDSUPPORT
+ 
+ /**
+  * SD CARD: SPI SPEED
+@@ -1434,6 +1493,7 @@
+ // http://reprap.org/wiki/PanelOne
+ //
+ //#define PANEL_ONE
++// 12k byte over budget
+ 
+ //
+ // MaKr3d Makr-Panel with graphic controller and SD support.
+@@ -1468,6 +1528,7 @@
+ // Note: Usually sold with a white PCB.
+ //
+ //#define REPRAP_DISCOUNT_SMART_CONTROLLER
++// 12k over budget
+ 
+ //
+ // GADGETS3D G3D LCD/SD Controller
+@@ -1482,6 +1543,7 @@
+ // http://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
+ //
+ //#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
++// 18k over budget
+ 
+ //
+ // MakerLab Mini Panel with graphic
+@@ -1589,7 +1651,7 @@
+ //#define SAV_3DGLCD
+ #if ENABLED(SAV_3DGLCD)
+   //#define U8GLIB_SSD1306
+-  #define U8GLIB_SH1106
++  //#define U8GLIB_SH1106
+ #endif
+ 
+ //
+@@ -1599,6 +1661,10 @@
+ // LCD configuration: http://reprap.org/wiki/SAV_3D_LCD
+ //
+ //#define SAV_3DLCD
++// these are only here to test compile
++//#define SR_DATA_PIN 55
++//#define SR_CLK_PIN 56
++// 12k byte over budget
+ 
+ //
+ // TinyBoy2 128x64 OLED / Encoder Panel
+@@ -1721,14 +1787,14 @@
+ #endif
+ 
+ // Support for Adafruit Neopixel LED driver
+-//#define NEOPIXEL_LED
++#define NEOPIXEL_LED
+ #if ENABLED(NEOPIXEL_LED)
+   #define NEOPIXEL_TYPE   NEO_GRBW // NEO_GRBW / NEO_GRB - four/three channel driver type (defined in Adafruit_NeoPixel.h)
+   #define NEOPIXEL_PIN    4        // LED driving pin on motherboard 4 => D4 (EXP2-5 on Printrboard) / 30 => PC7 (EXP3-13 on Rumba)
+-  #define NEOPIXEL_PIXELS 30       // Number of LEDs in the strip
++  #define NEOPIXEL_PIXELS 3       // Number of LEDs in the strip
+   #define NEOPIXEL_IS_SEQUENTIAL   // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
+-  #define NEOPIXEL_BRIGHTNESS 127  // Initial brightness (0-255)
+-  //#define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
++  #define NEOPIXEL_BRIGHTNESS 255  // Initial brightness (0-255)
++  #define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
+ #endif
+ 
+ /**
+--- ./Marlin/Configuration_adv.h.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/Configuration_adv.h	2017-12-26 05:47:33.846818371 -0700
+@@ -214,7 +214,12 @@
+  * Multiple extruders can be assigned to the same pin in which case
+  * the fan will turn on when any selected extruder is above the threshold.
+  */
+-#define E0_AUTO_FAN_PIN -1
++/*
++ * This is EXP1/JP2 pin 3 (PE5)
++ * at90usb1286 to arduino pin mapping is here:
++ *     https://labitat.dk/wiki/Panelolu_and_Printrboard_the_easy_way
++ */
++#define E0_AUTO_FAN_PIN 37
+ #define E1_AUTO_FAN_PIN -1
+ #define E2_AUTO_FAN_PIN -1
+ #define E3_AUTO_FAN_PIN -1
+@@ -435,7 +440,7 @@
+  */
+ //#define PWM_MOTOR_CURRENT { 1300, 1300, 1250 }          // Values in milliamps
+ //#define DIGIPOT_MOTOR_CURRENT { 135,135,135,135,135 }   // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+-//#define DAC_MOTOR_CURRENT_DEFAULT { 70, 80, 90, 80 }    // Default drive percent - X, Y, Z, E axis
++#define DAC_MOTOR_CURRENT_DEFAULT { 70, 80, 90, 80 }    // Default drive percent - X, Y, Z, E axis
+ 
+ // Use an I2C based DIGIPOT (e.g., Azteeg X3 Pro)
+ //#define DIGIPOT_I2C
+@@ -576,7 +581,7 @@
+   //#define LCD_SET_PROGRESS_MANUALLY
+ 
+   // This allows hosts to request long names for files and folders with M33
+-  //#define LONG_FILENAME_HOST_SUPPORT
++  #define LONG_FILENAME_HOST_SUPPORT
+ 
+   // Enable this option to scroll long filenames in the SD card menu
+   //#define SCROLL_LONG_FILENAMES
+@@ -676,10 +681,10 @@
+  * K=0 means advance disabled.
+  * See Marlin documentation for calibration instructions.
+  */
+-//#define LIN_ADVANCE
++#define LIN_ADVANCE
+ 
+ #if ENABLED(LIN_ADVANCE)
+-  #define LIN_ADVANCE_K 75
++  #define LIN_ADVANCE_K 0
+ 
+   /**
+    * Some Slicers produce Gcode with randomly jumping extrusion widths occasionally.
+@@ -843,14 +848,14 @@
+  * Note that M207 / M208 / M209 settings are saved to EEPROM.
+  *
+  */
+-//#define FWRETRACT  // ONLY PARTIALLY TESTED
++#define FWRETRACT  // ONLY PARTIALLY TESTED
+ #if ENABLED(FWRETRACT)
+   #define MIN_AUTORETRACT 0.1             // When auto-retract is on, convert E moves of this length and over
+   #define MAX_AUTORETRACT 10.0            // Upper limit for auto-retract conversion
+-  #define RETRACT_LENGTH 3                // Default retract length (positive mm)
+-  #define RETRACT_LENGTH_SWAP 13          // Default swap retract length (positive mm), for extruder change
+-  #define RETRACT_FEEDRATE 45             // Default feedrate for retracting (mm/s)
+-  #define RETRACT_ZLIFT 0                 // Default retract Z-lift
++  #define RETRACT_LENGTH 0.8              // Default retract length (positive mm)
++  #define RETRACT_LENGTH_SWAP 3           // Default swap retract length (positive mm), for extruder change
++  #define RETRACT_FEEDRATE 16             // Default feedrate for retracting (mm/s)
++  #define RETRACT_ZLIFT 0.2               // Default retract Z-lift
+   #define RETRACT_RECOVER_LENGTH 0        // Default additional recover length (mm, added to retract length when recovering)
+   #define RETRACT_RECOVER_LENGTH_SWAP 0   // Default additional swap recover length (mm, added to retract length when recovering from extruder change)
+   #define RETRACT_RECOVER_FEEDRATE 8      // Default feedrate for recovering from retraction (mm/s)
+@@ -1393,7 +1398,7 @@
+  *  - M206 and M428 are disabled.
+  *  - G92 will revert to its behavior from Marlin 1.0.
+  */
+-//#define NO_WORKSPACE_OFFSETS
++#define NO_WORKSPACE_OFFSETS
+ 
+ /**
+  * Set the number of proportional font spaces required to fill up a typical character space.
+--- ./Marlin/Makefile.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/Makefile	2017-12-26 17:39:42.746037818 -0700
+@@ -83,11 +83,11 @@ LIQUID_TWI2        ?= 0
+ WIRE               ?= 0
+ 
+ # this defines if U8GLIB is needed (may require RELOC_WORKAROUND)
+-U8GLIB             ?= 1
++U8GLIB             ?= 0
+ 
+ # this defines whether to add a workaround for the avr-gcc relocation bug
+ #	  https://www.stix.id.au/wiki/AVR_relocation_truncations_workaround
+-RELOC_WORKAROUND   ?= 1
++RELOC_WORKAROUND   ?= 0
+ 
+ ############################################################################
+ # Below here nothing should be changed...
+@@ -235,6 +235,11 @@ else ifeq  ($(HARDWARE_MOTHERBOARD),301)
+ HARDWARE_VARIANT ?= arduino
+ MCU              ?= atmega2560
+ 
++#Mini Rambo
++else ifeq  ($(HARDWARE_MOTHERBOARD),302)
++HARDWARE_VARIANT ?= arduino
++MCU              ?= atmega2560
++
+ # Azteeg
+ else ifeq  ($(HARDWARE_MOTHERBOARD),67)
+ HARDWARE_VARIANT ?= arduino
+@@ -263,22 +268,32 @@ TARGET = $(notdir $(CURDIR))
+ 
+ VPATH = .
+ VPATH += $(BUILD_DIR)
++ifeq ($(HARDWARE_VARIANT), Teensy)
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/avr/cores/teensy
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/avr/libraries/Wire
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/avr/libraries/Wire/utility
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/avr/libraries/SPI
++else
+ VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/cores/arduino
+-
+ VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/SPI
+ VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/SPI/src
+-VPATH += $(ARDUINO_INSTALL_DIR)/libraries/LiquidCrystal/src
++VPATH += $(HARDWARE_DIR)/arduino/hardware/teensy/avr/libraries/SPI
++endif
+ ifeq ($(LIQUID_TWI2), 1)
+ VPATH += $(ARDUINO_INSTALL_DIR)/libraries/Wire
+ VPATH += $(ARDUINO_INSTALL_DIR)/libraries/Wire/utility
+-VPATH += $(ARDUINO_INSTALL_DIR)/libraries/LiquidTWI2
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/Wire/src
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/Wire/src/utility
++VPATH += $(HOME)/Arduino/libraries/LiquidTWI2
+ endif
+ ifeq ($(WIRE), 1)
+-VPATH += $(ARDUINO_INSTALL_DIR)/libraries/Wire
+-VPATH += $(ARDUINO_INSTALL_DIR)/libraries/Wire/utility
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/Wire/src
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/libraries/Wire/src/utility
++VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/avr/libraries/Wire/src
+ endif
+ ifeq ($(NEOPIXEL), 1)
+-VPATH += $(ARDUINO_INSTALL_DIR)/libraries/Adafruit_NeoPixel
++VPATH += $(HOME)/Arduino/libraries/Adafruit_NeoPixel
++CXXSRC += leds.cpp neopixel.cpp Adafruit_NeoPixel.cpp
+ endif
+ ifeq ($(U8GLIB), 1)
+ VPATH += $(ARDUINO_INSTALL_DIR)/libraries/U8glib
+@@ -288,6 +303,7 @@ endif
+ ifeq ($(HARDWARE_VARIANT), arduino)
+ HARDWARE_SUB_VARIANT ?= mega
+ VPATH += $(ARDUINO_INSTALL_DIR)/hardware/arduino/avr/variants/$(HARDWARE_SUB_VARIANT)
++VPATH += $(HARDWARE_DIR)/arduino/hardware/arduino/avr/libraries/SPI
+ else
+ ifeq ($(HARDWARE_VARIANT), Sanguino)
+ VPATH += $(HARDWARE_DIR)/marlin/avr/variants/sanguino
+@@ -296,25 +312,28 @@ HARDWARE_SUB_VARIANT ?= standard
+ VPATH += $(HARDWARE_DIR)/$(HARDWARE_VARIANT)/variants/$(HARDWARE_SUB_VARIANT)
+ endif
+ endif
++ifeq ($(HARDWARE_VARIANT), Teensy)
++SRC = wiring.c twi.c
++CXXSRC = WMath.cpp HardwareSerial.cpp Print.cpp Wire.cpp
++else
+ SRC = wiring.c \
+ 	wiring_analog.c wiring_digital.c \
+ 	wiring_pulse.c \
+ 	wiring_shift.c WInterrupts.c hooks.c
+-ifeq ($(HARDWARE_VARIANT), Teensy)
+-SRC = wiring.c
+-VPATH += $(ARDUINO_INSTALL_DIR)/hardware/teensy/cores/teensy
+-endif
+ CXXSRC = WMath.cpp WString.cpp Print.cpp SPI.cpp Tone.cpp
++endif
+ CXXSRC += $(wildcard *.cpp)
+ ifeq ($(NEOPIXEL), 1)
+ CXXSRC += Adafruit_NeoPixel.cpp
+ endif
++ifneq ($(HARDWARE_VARIANT), Teensy)
+ ifeq ($(LIQUID_TWI2), 0)
+ CXXSRC += LiquidCrystal.cpp
+ else
+ SRC += twi.c
+ CXXSRC += Wire.cpp LiquidTWI2.cpp
+ endif
++endif
+ 
+ ifeq ($(WIRE), 1)
+ SRC += twi.c
+@@ -368,7 +387,7 @@ CDEFS    = -DF_CPU=$(F_CPU) ${addprefix
+ CXXDEFS  = $(CDEFS)
+ 
+ ifeq ($(HARDWARE_VARIANT), Teensy)
+-CDEFS  += -DUSB_SERIAL
++CDEFS  += -DUSB_SERIAL -DUSBCON=1286
+ SRC    += usb.c pins_teensy.c
+ CXXSRC += usb_api.cpp
+ endif
+@@ -384,7 +403,6 @@ CDEBUG = -g$(DEBUG)
+ CWARN = -Wall -Wstrict-prototypes
+ CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct \
+ 	-fshort-enums -w -ffunction-sections -fdata-sections \
+-	-flto \
+ 	-DARDUINO=$(ARDUINO_VERSION)
+ ifneq ($(HARDWARE_MOTHERBOARD),)
+ CTUNING += -DMOTHERBOARD=${HARDWARE_MOTHERBOARD}
+--- ./Marlin/Marlin_main.cpp.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/Marlin_main.cpp	2017-12-27 02:44:45.659265930 -0700
+@@ -14383,6 +14383,10 @@ void setup() {
+ 
+   thermalManager.init();    // Initialize temperature loop
+ 
++  #if HAS_COLOR_LEDS
++    leds.setup();
++  #endif
++
+   #if ENABLED(USE_WATCHDOG)
+     watchdog_init();
+   #endif
+@@ -14447,10 +14451,6 @@ void setup() {
+     OUT_WRITE(STAT_LED_BLUE_PIN, LOW); // turn it off
+   #endif
+ 
+-  #if HAS_COLOR_LEDS
+-    leds.setup();
+-  #endif
+-
+   #if ENABLED(RGB_LED) || ENABLED(RGBW_LED)
+     SET_OUTPUT(RGB_LED_R_PIN);
+     SET_OUTPUT(RGB_LED_G_PIN);
+--- ./Marlin/pins_PRINTRBOARD_REVF.h.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/pins_PRINTRBOARD_REVF.h	2017-12-26 17:21:06.439653358 -0700
+@@ -195,7 +195,9 @@
+ //
+ // LCD / Controller
+ //
+-//#define USE_INTERNAL_SD
++#define USE_INTERNAL_SD
++#define SDSS 20
++#define SD_DETECT_PIN 15
+ 
+ #if ENABLED(ULTRA_LCD)
+   #define LCD_PINS_RS       9   // E1       JP11-11
+--- ./Marlin/planner.cpp.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/planner.cpp	2017-12-27 02:39:30.102633180 -0700
+@@ -617,13 +617,32 @@ void Planner::check_axes_activity() {
+ 
+     #if ABL_PLANAR
+ 
+-      float dx = rx - (X_TILT_FULCRUM),
+-            dy = ry - (Y_TILT_FULCRUM);
++		float dx(rx - (X_TILT_FULCRUM));
++		float dy(ry - (Y_TILT_FULCRUM));
+ 
+-      apply_rotation_xyz(bed_level_matrix, dx, dy, rz);
+-
+-      rx = dx + X_TILT_FULCRUM;
+-      ry = dy + Y_TILT_FULCRUM;
++		if ( z_fade_height != 0.0 )
++		{
++			static float z_fade_factor = 1.0;
++			static float prev_rz = -999.0;
++
++			if ( rz < z_fade_height )
++			{
++				if ( prev_rz != rz )
++				{
++					prev_rz = rz;
++					z_fade_factor = 1.0 - rz * inverse_z_fade_height;
++				}
++
++				rz = bed_level_matrix.get_z_by_factor(vector_3(dx, dy, rz), z_fade_factor);
++			}
++		}
++		else
++		{
++			apply_rotation_xyz(bed_level_matrix, dx, dy, rz);
++
++			rx = dx + X_TILT_FULCRUM;
++			ry = dy + Y_TILT_FULCRUM;
++		}
+ 
+     #else
+ 
+@@ -659,25 +678,42 @@ void Planner::check_axes_activity() {
+ 
+   void Planner::unapply_leveling(float raw[XYZ]) {
+ 
++    #if ! ABL_PLANAR
+     #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
+       const float fade_scaling_factor = fade_scaling_factor_for_z(raw[Z_AXIS]);
+     #else
+       constexpr float fade_scaling_factor = 1.0;
+     #endif
++    #endif
+ 
+-    if (leveling_active && fade_scaling_factor) {
++    if (leveling_active) {
+ 
+       #if ABL_PLANAR
+ 
+-        matrix_3x3 inverse = matrix_3x3::transpose(bed_level_matrix);
+-
+-        float dx = raw[X_AXIS] - (X_TILT_FULCRUM),
+-              dy = raw[Y_AXIS] - (Y_TILT_FULCRUM);
+-
+-        apply_rotation_xyz(inverse, dx, dy, raw[Z_AXIS]);
+-
+-        raw[X_AXIS] = dx + X_TILT_FULCRUM;
+-        raw[Y_AXIS] = dy + Y_TILT_FULCRUM;
++		if ( z_fade_height != 0.0  )
++		{
++			const float rz(raw[Z_AXIS]);
++
++			if ( rz < z_fade_height )
++			{
++				matrix_3x3 inverse(matrix_3x3::transpose(bed_level_matrix));
++				const float dx(raw[X_AXIS] - (X_TILT_FULCRUM));
++				const float dy(raw[Y_AXIS] - (Y_TILT_FULCRUM));
++
++				raw[Z_AXIS] = inverse.get_z_by_factor(vector_3(dx, dy, rz), (z_fade_height - rz) / z_fade_height);
++			}
++		}
++		else
++		{
++			matrix_3x3 inverse = matrix_3x3::transpose(bed_level_matrix);
++			float dx(raw[X_AXIS] - (X_TILT_FULCRUM));
++			float dy(raw[Y_AXIS] - (Y_TILT_FULCRUM));
++
++			apply_rotation_xyz(inverse, dx, dy, raw[Z_AXIS]);
++
++			raw[X_AXIS] = dx + X_TILT_FULCRUM;
++			raw[Y_AXIS] = dy + Y_TILT_FULCRUM;
++		}
+ 
+       #else // !ABL_PLANAR
+ 
+--- ./Marlin/ultralcd_st7920_u8glib_rrd.h.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/ultralcd_st7920_u8glib_rrd.h	2017-12-26 05:47:33.853818300 -0700
+@@ -37,7 +37,7 @@
+ #define LCD_PIXEL_HEIGHT 64
+ 
+ //set optimization so ARDUINO optimizes this file
+-#pragma GCC optimize (3)
++//#pragma GCC optimize (3)
+ 
+ // If you want you can define your own set of delays in Configuration.h
+ //#define ST7920_DELAY_1 DELAY_0_NOP
+--- ./Marlin/vector_3.cpp.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/vector_3.cpp	2017-12-26 05:47:33.854818289 -0700
+@@ -81,6 +81,35 @@ void vector_3::apply_rotation(matrix_3x3
+   z = resultZ;
+ }
+ 
++namespace {
++
++/*
++ * https://en.wikipedia.org/wiki/Identity_matrix
++ *
++ * | 1 0 0 |
++ * | 0 1 0 |
++ * | 0 0 1 |
++ */
++
++inline float calcFact0(float n, float factor)
++{
++  return n * factor;
++}
++
++inline float calcFact1(float n, float factor)
++{
++  return 1.0 + ((n-1.0)*factor);
++}
++
++} // namespace
++
++float matrix_3x3::get_z_by_factor(vector_3 input, float factor)
++{
++  return input.x * calcFact0(matrix[3 * 0 + 2], factor)
++        + input.y * calcFact0(matrix[3 * 1 + 2], factor)
++        + input.z * calcFact1(matrix[3 * 2 + 2], factor);
++}
++
+ void vector_3::debug(const char * const title) {
+   serialprintPGM(title);
+   SERIAL_PROTOCOLPGM(" x: ");
+--- ./Marlin/vector_3.h.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/vector_3.h	2017-12-26 05:47:33.854818289 -0700
+@@ -72,6 +72,7 @@ struct matrix_3x3 {
+   static matrix_3x3 transpose(matrix_3x3 original);
+ 
+   void set_to_identity();
++  float get_z_by_factor(vector_3 input, float factor); // factor should be 1.0 to 0.0, 1.0 occurs at z == 0.0
+ 
+   void debug(const char * const title);
+ };
+--- ./Marlin/build-printrbot.sh.orig	2017-12-26 05:47:33.854818289 -0700
++++ ./Marlin/build-printrbot.sh	2017-12-26 05:47:33.854818289 -0700
+@@ -0,0 +1,46 @@
++#! /bin/bash
++IDE_VERSION=$(xip list ArduinoIde | cut -d/ -f2 | tr '.' '0')
++
++set -e
++
++#
++# Assumptions:
++#     using a Ubis 13s hotend
++#     using a heated bed
++#
++
++mkdir -p /var/tmp/PrintrBotFirmware
++
++for extruder in EXTRUDER_OLD EXTRUDER_GEARHEAD; do
++	extrudername=extold
++	[[ $extruder != EXTRUDER_GEARHEAD ]] || extrudername=extgh
++	for zrod in ZROD_STANDARD ZROD_SUPER_Z; do
++		zrodname=origz
++		[[ $zrod != ZROD_SUPER_Z ]] || zrodname=superz
++		for axis in X_AXIS_STANDARD X_AXIS_UPGRADE; do
++			axisname=origx
++			[[ $axis != X_AXIS_UPGRADE ]] || axisname=xupg
++			for rod in ZROD_QUARTER ZROD_FOUR_START_8MM; do
++				rodname=quarter
++				[[ $rod != ZROD_FOUR_START_8MM ]] || rodname=fs8
++				for pulley in PULLEY_XY_20T PULLEY_XY_16T; do
++					pulleyname=20t
++					[[ $pulley != PULLEY_XY_16T ]] || pulleyname=16t
++					cat > PrintrBotConfig.h <<END
++#define $rod 1
++#define $pulley 1
++#define $extruder 1
++#define $axis 1
++#define $zrod 1
++END
++					make clean
++					make -j8 -f Makefile V=1 ARDUINO_VERSION=$IDE_VERSION ARDUINO_INSTALL_DIR=/opt/arduino AVR_TOOLS_PATH=/usr/bin/ HARDWARE_MOTHERBOARD=811 NEOPIXEL=1
++					cp applet/Marlin.hex /var/tmp/PrintrBotFirmware/$extrudername-$zrodname-$axisname-$rodname-$pulleyname.hex
++				done
++			done
++		done
++	done
++done
++
++cp LEGEND.txt /var/tmp/PrintrBotFirmware
++
+--- ./Marlin/build-minirambo-printrbot.sh.orig	2017-12-26 05:47:33.854818289 -0700
++++ ./Marlin/build-minirambo-printrbot.sh	2017-12-26 05:47:33.854818289 -0700
+@@ -0,0 +1,16 @@
++#! /bin/bash
++
++IDE_VERSION=$(xip list ArduinoIde | cut -d/ -f2 | tr '.' '0')
++
++# turn on XON/XOFF support
++sed -i -e 's!//#define RX_BUFFER_SIZE 1024!#define RX_BUFFER_SIZE 1024!' \
++	-e 's!//#define SERIAL_XON_XOFF!#define SERIAL_XON_XOFF!' \
++		Configuration_adv.h
++
++make -j8 -f Makefile V=1 ARDUINO_VERSION=$IDE_VERSION ARDUINO_INSTALL_DIR=/opt/arduino AVR_TOOLS_PATH=/usr/bin/ HARDWARE_MOTHERBOARD=302 NEOPIXEL=1
++
++# turn off XON/XOFF support
++sed -i -e 's!#define RX_BUFFER_SIZE 1024!//#define RX_BUFFER_SIZE 1024!' \
++	-e 's!#define SERIAL_XON_XOFF!//#define SERIAL_XON_XOFF!' \
++		Configuration_adv.h
++
+--- ./Marlin/PrintrBot_Simple_with_ZHop.ini.orig	2017-12-26 05:47:33.855818279 -0700
++++ ./Marlin/PrintrBot_Simple_with_ZHop.ini	2017-12-26 05:47:33.855818279 -0700
+@@ -0,0 +1,40 @@
++# generated by Slic3r 1.35.0.23-prusa3d-win64 on Tue Jun  6 11:50:10 2017
++bed_shape = 0x0,150x0,150x150,0x150
++before_layer_gcode = 
++deretract_speed = 0
++end_gcode = G4 ; wait\nM104 S0 ; turn off temperature\nM140 S0 ; turn off heatbed\nM107 ; turn off fan\nG1 X0 Y140; home X axis\nM84 ; disable motors
++extruder_colour = #FFFF00
++extruder_offset = 0x0
++gcode_flavor = reprap
++layer_gcode = 
++max_layer_height = 0.25
++min_layer_height = 0.07
++nozzle_diameter = 0.4
++octoprint_apikey = 
++octoprint_host = 
++printer_notes = 
++printer_settings_id = 
++retract_before_travel = 1
++retract_before_wipe = 0%
++retract_layer_change = 1
++retract_length = 0.8
++retract_length_toolchange = 3
++retract_lift = 0.5
++retract_lift_above = 1
++retract_lift_below = 199
++retract_restart_extra = 0
++retract_restart_extra_toolchange = 0
++retract_speed = 35
++serial_port = 
++serial_speed = 250000
++set_and_wait_temperatures = 0
++single_extruder_multi_material = 0
++start_gcode = M200 0; make sure we're not in volumentric mode\nM104 S[first_layer_temperature] ; set hotend temp\nM140 S[first_layer_bed_temperature] ; set bed temp\nM190 S[first_layer_bed_temperature] ; wait for bed temp\nM109 S[first_layer_temperature] ; wait for extruder temp\nG28 ; home all axis (Prusa MK2 does bed leveling here)\nG29 ; Marlin bed leveling\nG1 Y-1.5 X20.0 Z0.15 F3200.0 ; go outside print area\nG1 X60.0 E9.0  F1000.0 ; intro line\nG1 X100.0 E12.5  F1000.0 ; intro line
++
++toolchange_gcode = 
++use_firmware_retraction = 0
++use_relative_e_distances = 1
++use_volumetric_e = 0
++variable_layer_height = 1
++wipe = 1
++z_offset = 0
+--- ./Marlin/PrintrBotConfig.h.orig	2017-12-26 05:47:33.855818279 -0700
++++ ./Marlin/PrintrBotConfig.h	2017-12-27 04:26:37.572427361 -0700
+@@ -0,0 +1,5 @@
++#define ZROD_FOUR_START_8MM 1
++#define PULLEY_XY_16T 1
++#define EXTRUDER_GEARHEAD 1
++#define X_AXIS_STANDARD 1
++#define ZROD_SUPER_Z 1
+--- ./Marlin/LEGEND.txt.orig	2017-12-26 05:47:33.855818279 -0700
++++ ./Marlin/LEGEND.txt	2017-12-26 05:47:33.855818279 -0700
+@@ -0,0 +1,26 @@
++PrintrBot Simple Firmware legend:
++
++extruder:
++    |
++    |- extold - the original simple extruder
++    |- extgh  - the gearhead extruder
++
++        z-axis height:
++            |
++            |- origz  - the original simple z height
++            |- superz - the super-z upgrade
++
++            x-axis width:
++                |
++                |- origx - the original simple z width
++                |- xupg  - the x upgrade
++
++                z-rod type:
++                    |
++                    |- quarter - the original simple quarter inch z lead-screw
++                    |- fs8     - the 8mm four-start z lead-screw
++
++                    pulley teeth:
++                        20t - the original simple 20 tooth pulleys
++                        16t - converted to 16 tooth pulleys
++
+--- ./Marlin/build-printrbot-local.sh.orig	2017-12-26 05:47:33.855818279 -0700
++++ ./Marlin/build-printrbot-local.sh	2017-12-26 06:21:18.466765176 -0700
+@@ -0,0 +1,26 @@
++#! /bin/bash
++IDE_VERSION=$(xip list ArduinoIde | cut -d/ -f2 | tr '.' '0')
++
++set -e
++
++#
++# Assumptions:
++#     using a Ubis 13s hotend
++#     using a heated bed
++#
++
++sed -i -e 's/#define INVERT_E0_DIR false/#define INVERT_E0_DIR true/' Configuration.h
++
++cat > PrintrBotConfig.h <<END
++#define ZROD_FOUR_START_8MM 1
++#define PULLEY_XY_16T 1
++#define EXTRUDER_GEARHEAD 1
++#define X_AXIS_STANDARD 1
++#define ZROD_SUPER_Z 1
++END
++make clean
++make -j8 -f Makefile V=1 ARDUINO_VERSION=$IDE_VERSION ARDUINO_INSTALL_DIR=/opt/arduino AVR_TOOLS_PATH=/usr/bin/ HARDWARE_MOTHERBOARD=811 NEOPIXEL=1
++cp applet/Marlin.hex /tmp/XilkaMarlin.hex
++
++sed -i -e 's/#define INVERT_E0_DIR true/#define INVERT_E0_DIR false/' Configuration.h
++
+--- ./Marlin/neopixel.cpp.orig	2017-12-25 08:52:04.000000000 -0700
++++ ./Marlin/neopixel.cpp	2017-12-26 05:47:33.855818279 -0700
+@@ -28,6 +28,8 @@
+ 
+ #if ENABLED(NEOPIXEL_LED)
+ 
++#include "types.h"
++#include "utility.h"
+ #include "neopixel.h"
+ 
+ Adafruit_NeoPixel pixels(NEOPIXEL_PIXELS, NEOPIXEL_PIN, NEOPIXEL_TYPE + NEO_KHZ800);
